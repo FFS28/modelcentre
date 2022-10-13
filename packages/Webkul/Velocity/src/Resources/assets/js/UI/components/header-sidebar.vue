@@ -30,6 +30,7 @@ export default {
     async created(){
         var data = await fetch("/getAllCategories").then(res => {
             return res.json().then(data => {
+                console.log(data)
                 return data;
             })
         }).catch(err => {console.log(err)})

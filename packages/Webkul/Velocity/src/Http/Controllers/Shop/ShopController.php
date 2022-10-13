@@ -403,7 +403,6 @@ class ShopController extends Controller
 
         $product_data = DB::table('product_option')
             ->where('product_id', $product_id)
-            // ->where('product_id', 68557)
             ->get();
 
         foreach ($product_data as $key => $cur) {
