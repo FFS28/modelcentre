@@ -183,13 +183,13 @@ class OnepageController extends Controller
 
         $cart = Cart::getCart();
         $customer_id = $this->bpCustomer($cart->customer_email);
-
         if ($redirectUrl = Payment::getRedirectUrl($cart)) {
             return response()->json([
                 'success'      => true,
                 'redirect_url' => $redirectUrl,
             ]);
         }
+
 
         $order = $this->orderRepository->create(Cart::prepareDataForOrder());
 
@@ -200,6 +200,7 @@ class OnepageController extends Controller
         session()->flash('order', $order);
 
         $this->bpOrder($cart->customer_email, $customer_id, $cart->id);
+        die();
         return response()->json([
             'success' => true,
         ]);
@@ -460,12 +461,11 @@ class OnepageController extends Controller
         $bpAdapt = new BPController();
         $bpAdapt->init();
         $bpAdapt->authenticate();
-
         $address = DB::table('addresses')
             ->select('first_name', 'last_name', 'address1', 'phone', 'postCode', 'company_name', 'country')
-            ->where('customer_id', $customer_id)
+            ->where('email', $customer_email)
+            ->where('address_type', 'customer')
             ->get();
-
         $products = DB::table('cart_items')
             ->select('quantity', 'name', 'price', 'base_price', 'product_id')
             ->where('cart_id', $cartItem)
@@ -479,31 +479,34 @@ class OnepageController extends Controller
 
             $product_id = $bpAdapt->getProductIDFromSKU($sku[0]->sku);
             array_push($product_rows, [
-                "productId" => $product_id,
+                "productId" => $product_id[0][0],
                 "name" => $product->name,
                 "quantity" => $product->quantity,
-                "nominalCode" => "4000"
+                "nominalCode" => "4000",
+                "taxCode" => "T20",
+                "tax" => "0",
+                "net"=> "100"
             ]);
         }
+
         $info = [
             "customer"=> [
                 "id"=> $customer_id
             ],
-            "warehouseId"=> 2,
             "currency"=> [
                 "code"=> "GBP",
                 "fixedExchangeRate"=> true,
                 "exchangeRate"=> "1"
             ],
             "delivery"=> [
-                "date"=> date(DATE_ATOM,"Y-m-d"),
+                "date"=> date(DATE_ATOM, mktime(0, 1, 0)),
                 "address"=> [
                     "addressFullName"=> $address[0]->first_name." ".$address[0]->last_name,
-                    "companyName"=> $address->company_name,
-                    "addressLine1"=> $address->address1,
-                    "postalCode"=> $address->postCode,
-                    "countryIsoCode"=> $address->country,
-                    "telephone"=> $address->phone,
+                    "companyName"=> $address[0]->company_name,
+                    "addressLine1"=> $address[0]->address1,
+                    "postalCode"=> $address[0]->postCode,
+                    "countryIsoCode"=> $address[0]->country,
+                    "telephone"=> $address[0]->phone,
                     "email"=> $customer_email
                 ],
                 "shippingMethodId"=> 6
@@ -511,6 +514,6 @@ class OnepageController extends Controller
             "rows" => $product_rows
         ];
 
-        $bpAdapt->createNewOrder($info);
+        $bpAdapt->createNewOrder(json_encode($info));
     }
 }

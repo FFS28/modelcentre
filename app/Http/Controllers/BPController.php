@@ -211,6 +211,25 @@ class BPController
 
 		$response = json_decode(curl_exec($ch));
 		curl_close($ch);
-
+        var_dump($response);
     }
+
+    public function getTaxCode(){
+
+		$headers = array(
+		  	"brightpearl-auth: ".$this->authToken,
+		  	'Content-Type: application/json'
+        );
+
+        $statusURL='https://we-eu1.brightpearl.com/2.0.0/'.$this->account.'/accounting-service/tax-code';
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $statusURL);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        $response = json_decode(curl_exec($ch));//should try catch error here
+        curl_close($ch);
+
+        return $response;
+	}
 }
