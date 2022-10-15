@@ -2,19 +2,31 @@
 
 namespace App\Http\Controllers;
 
+use PDO;
 
 class BPController
 {
-    public function authenticate($accountId, $user, $password){
-		$ch = curl_init();
+    private $account = "";
+    private $user = "";
+    private $password = "";
+    private $authToken = "";
+
+    public function init(){
+        $this->account = env('BP_ACCOUNT');
+        $this->user = env('BP_USER');
+        $this->password = env('BP_PASSWORD');
+    }
+
+    public function authenticate(){
+        $ch = curl_init();
 		$authenticationDetails = array(
 			'apiAccountCredentials' => array(
-				'emailAddress' => $user,
-				'password'     => $password,
+				'emailAddress' => $this->user,
+				'password'     => $this->password,
 			),
 		);
 		$encodedAuthenticationDetails = json_encode($authenticationDetails);
-		$authenticationUrl = 'https://ws-eu1.brightpearl.com/'.$accountId.'/authorise';
+		$authenticationUrl = 'https://ws-eu1.brightpearl.com/'.$this->account.'/authorise';
 		$header = array('Content-Type: application/json');
 
 		curl_setopt($ch, CURLOPT_URL, $authenticationUrl);
@@ -26,7 +38,7 @@ class BPController
 		$response = curl_exec($ch);
 		if (false === $response) {
 			echo 'Request unsuccessful' . PHP_EOL;
-		curl_close($ch);
+		    curl_close($ch);
 			exit(1);
 		}
 		$responseCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -40,16 +52,15 @@ class BPController
 		}
 			exit(1);
 		}
-		$authorisationToken = $responseBody->response;
-		return $authorisationToken;
+		$this->authToken = $responseBody->response;
 	}
 
-    public function getProductStock($accountId, $authToken, $productID){
+    public function getProductStock($productID){
 		$header = array(
-			'brightpearl-auth: '.$authToken,
+			'brightpearl-auth: '.$this->authToken,
 			'content-Type: application/json'
 		);
-		$reqURL = 'https://ws-eu1.brightpearl.com/2.0.0/'.$accountId.'/warehouse-service/product-availability/'.implode(',', $productID);
+		$reqURL = 'https://ws-eu1.brightpearl.com/2.0.0/'.$this->account.'/warehouse-service/product-availability/'.implode(',', $productID);
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $reqURL);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -62,13 +73,13 @@ class BPController
 		return $productStock['response'];
 	}
 
-    public function getProductIDFromSKU($accountId, $authToken, $SKU){
+    public function getProductIDFromSKU($SKU){
 
         $header = array(
-			'brightpearl-auth: '.$authToken,
+			'brightpearl-auth: '.$this->authToken,
 			'content-Type: application/json'
 		);
-		$reqURL = "https://ws-eu1.brightpearl.com/2.0.0/".$accountId."/product-service/product-search?SKU=".$SKU;
+		$reqURL = "https://ws-eu1.brightpearl.com/2.0.0/".$this->account."/product-service/product-search?SKU=".$SKU;
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $reqURL);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -77,5 +88,129 @@ class BPController
 		curl_close($ch);
         $productID = $response->response->results;
         return $productID;
+    }
+
+    public function isExistCustomer($email){
+        $header = array(
+			'brightpearl-auth: '.$this->authToken,
+			'content-Type: application/json'
+		);
+		$reqURL = "https://ws-eu1.brightpearl.com/2.0.0/".$this->account."/contact-service/contact-search?primaryEmail=".$email;
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $reqURL);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+		$response = json_decode(curl_exec($ch));
+		curl_close($ch);
+
+        $productID = $response->response->results;
+
+        return count($productID) === 0 ? false : true;
+    }
+
+    public function getCustomerId($email){
+        $header = array(
+			'brightpearl-auth: '.$this->authToken,
+			'content-Type: application/json'
+		);
+		$reqURL = "https://ws-eu1.brightpearl.com/2.0.0/".$this->account."/contact-service/contact-search?primaryEmail=".$email;
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $reqURL);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+		$response = json_decode(curl_exec($ch));
+		curl_close($ch);
+
+        $productID = $response->response->results;
+
+        return $productID[0][0];
+    }
+
+    public function createBPCustomer($customerInfo){
+
+        $header = array(
+			'brightpearl-auth: '.$this->authToken,
+			'content-Type: application/json'
+		);
+
+        $reqURL = "https://ws-eu1.brightpearl.com/2.0.0/".$this->account."/contact-service/contact";
+
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, $reqURL);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $customerInfo);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+		$response = json_decode(curl_exec($ch));
+		curl_close($ch);
+
+        return $response->response;
+    }
+
+    public function updateBPCustomer($id, $customerInfo){
+
+        $header = array(
+			'brightpearl-auth: '.$this->authToken,
+			'content-Type: application/json'
+		);
+
+        $reqURL = "https://ws-eu1.brightpearl.com/2.0.0/".$this->account."/contact-service/contact/".$id;
+
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, $reqURL);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $customerInfo);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+		$response = json_decode(curl_exec($ch));
+		curl_close($ch);
+        return $response->response->contactId;
+    }
+
+    public function createNewAddress($address) {
+        $header = array(
+			'brightpearl-auth: '.$this->authToken,
+			'content-Type: application/json'
+		);
+
+        $reqURL = "https://ws-eu1.brightpearl.com/2.0.0/".$this->account."/contact-service/postal-address";
+
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, $reqURL);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $address);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+		$response = json_decode(curl_exec($ch));
+		curl_close($ch);
+
+        return $response->response;
+    }
+
+    public function createNewOrder($info){
+        $header = array(
+			'brightpearl-auth: '.$this->authToken,
+			'content-Type: application/json'
+		);
+
+        $reqURL = "https://ws-eu1.brightpearl.com/2.0.0/".$this->account."/order-service/sales-order";
+
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_URL, $reqURL);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, $info);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+		$response = json_decode(curl_exec($ch));
+		curl_close($ch);
+
     }
 }

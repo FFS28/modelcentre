@@ -10,6 +10,8 @@ use Webkul\Payment\Facades\Payment;
 use Webkul\Sales\Repositories\OrderRepository;
 use Webkul\Shipping\Facades\Shipping;
 use Webkul\Shop\Http\Controllers\Controller;
+use App\Http\Controllers\BPController;
+use Illuminate\Support\Facades\DB;
 
 class OnepageController extends Controller
 {
@@ -180,6 +182,7 @@ class OnepageController extends Controller
         $this->validateOrder();
 
         $cart = Cart::getCart();
+        $customer_id = $this->bpCustomer($cart->customer_email);
 
         if ($redirectUrl = Payment::getRedirectUrl($cart)) {
             return response()->json([
@@ -196,6 +199,7 @@ class OnepageController extends Controller
 
         session()->flash('order', $order);
 
+        $this->bpOrder($cart->customer_email, $customer_id, $cart->id);
         return response()->json([
             'success' => true,
         ]);
@@ -364,5 +368,149 @@ class OnepageController extends Controller
             'status'  => ! $status ? false : true,
             'message' => ! $status ? trans('shop::app.checkout.cart.minimum-order-message', ['amount' => core()->currency($minimumOrderAmount)]) : 'Success',
         ]);
+    }
+
+    /**
+     *
+     * BP customer check function.
+     * If no customer, add customer to bp.
+     *
+     * @param string $customer >>> customer email
+     * @return int >>> customer id
+     *
+     */
+    public function bpCustomer($customer)
+    {
+        $bpAdapt = new BPController();
+        $bpAdapt->init();
+        $bpAdapt->authenticate();
+        $bpUser = DB::table('customers')
+            ->select('id')
+            ->where('email', $customer)
+            ->get();
+        $address = DB::table('addresses')
+            ->select('first_name', 'last_name', 'address1', 'phone', 'postCode')
+            ->where('customer_id', $bpUser[0]->id)
+            ->get();
+        $info = [
+            "addressLine1"=> $address[0]->address1,
+            "postalCode"=> $address[0]->postCode,
+        ];
+        $addressId = $bpAdapt->createNewAddress(json_encode($info));
+        // check bp customer
+        if(!$bpAdapt->isExistCustomer($customer)){
+            // if customer doesn't exist
+            $info = [
+                "firstName"=> $address[0]->first_name,
+                "lastName"=> $address[0]->last_name,
+                "postAddressIds"=> [
+                    "DEF"=> $addressId,
+                    "BIL" => $addressId,
+                    "DEL" => $addressId
+                ],
+                "communication"=> [
+                    "emails" => [
+                        "PRI" => ["email" => $customer],
+                        "SEC" => ["email" => $customer],
+                        "TER" => ["email" => $customer]
+                    ],
+                    "telephones" => [
+                        "PRI" => $address[0]->phone
+                    ]
+                ]
+            ];
+            return $bpAdapt->createBPCustomer(json_encode($info));
+        }else {
+            // if customer exist
+            $info = [
+                [
+                    "op"=> "replace",
+                    "path"=> "/firstName",
+                    "value"=> $address[0]->first_name
+                ],
+                [
+                    "op"=> "replace",
+                    "path"=> "/lastName",
+                    "value"=> $address[0]->last_name
+                ],
+                [
+                    "op"=> "replace",
+                    "path"=> "/communication/telephones/PRI",
+                    "value"=> $address[0]->phone
+                ],
+                [
+                    "op"=> "replace",
+                    "path"=> "/communication/emails/PRI/email",
+                    "value"=> $customer
+                ]
+            ];
+            return $bpAdapt->updateBPCustomer($bpAdapt->getCustomerId($customer), json_encode($info));
+        }
+    }
+
+    /**
+     * This is make order function for brightpearl
+     *
+     * @param string $custom_email >>> customer email
+     * @param int $customer_id >>> customer id from brightpearl
+     * @param int $cartItem >>> cart item id
+     * @return null
+     * */
+    public function bpOrder($customer_email, $customer_id, $cartItem){
+        $bpAdapt = new BPController();
+        $bpAdapt->init();
+        $bpAdapt->authenticate();
+
+        $address = DB::table('addresses')
+            ->select('first_name', 'last_name', 'address1', 'phone', 'postCode', 'company_name', 'country')
+            ->where('customer_id', $customer_id)
+            ->get();
+
+        $products = DB::table('cart_items')
+            ->select('quantity', 'name', 'price', 'base_price', 'product_id')
+            ->where('cart_id', $cartItem)
+            ->get();
+        $product_rows = [];
+        foreach($products as $product) {
+            $sku = DB::table('products')
+                ->select('sku')
+                ->where('id', $product->product_id)
+                ->get();
+
+            $product_id = $bpAdapt->getProductIDFromSKU($sku[0]->sku);
+            array_push($product_rows, [
+                "productId" => $product_id,
+                "name" => $product->name,
+                "quantity" => $product->quantity,
+                "nominalCode" => "4000"
+            ]);
+        }
+        $info = [
+            "customer"=> [
+                "id"=> $customer_id
+            ],
+            "warehouseId"=> 2,
+            "currency"=> [
+                "code"=> "GBP",
+                "fixedExchangeRate"=> true,
+                "exchangeRate"=> "1"
+            ],
+            "delivery"=> [
+                "date"=> date(DATE_ATOM,"Y-m-d"),
+                "address"=> [
+                    "addressFullName"=> $address[0]->first_name." ".$address[0]->last_name,
+                    "companyName"=> $address->company_name,
+                    "addressLine1"=> $address->address1,
+                    "postalCode"=> $address->postCode,
+                    "countryIsoCode"=> $address->country,
+                    "telephone"=> $address->phone,
+                    "email"=> $customer_email
+                ],
+                "shippingMethodId"=> 6
+            ],
+            "rows" => $product_rows
+        ];
+
+        $bpAdapt->createNewOrder($info);
     }
 }

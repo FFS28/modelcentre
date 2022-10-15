@@ -29,20 +29,19 @@ class bpconnect extends Command
      */
     public function handle()
     {
-        $account = env('BP_ACCOUNT');
-        $user = env('BP_USER');
-        $password = env('BP_PASSWORD');
+
         $productIDs = [];
         $bpIDs = [];
         $bpadapter = new BPController();
-        $authToken = $bpadapter->authenticate($account, $user, $password);
+        $bpadapter->init();
+        $bpadapter->authenticate();
 
         $products = DB::table('products')->select('id', 'sku')->get();
         echo "Getting product IDs...\n";
 
         foreach($products as $product){
 
-            $bpId = $bpadapter->getProductIDFromSKU($account, $authToken, $product->sku);
+            $bpId = $bpadapter->getProductIDFromSKU($product->sku);
             if(count($bpId) != 0){
                 array_push($productIDs, ["realId"=> $product->id, "bpId"=> $bpId[0][0]]);
                 array_push($bpIDs, $bpId[0][0]);
@@ -55,7 +54,7 @@ class bpconnect extends Command
 
         echo "Success.\nUpdating stocks...";
         sort($bpIDs);
-        $productStocks = $bpadapter->getProductStock($account, $authToken, $bpIDs);
+        $productStocks = $bpadapter->getProductStock($bpIDs);
         foreach($productIDs as $productID) {
             $stock = $productStocks[$productID['bpId']]['total']['inStock'];
             DB::table('product_inventories')
