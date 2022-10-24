@@ -544,10 +544,10 @@ return [
                 'bundle'                        => 'Bundle',
                 'downloadable'                  => 'Downloadable',
                 'grouped'                       => 'Grouped',
-                'virtual'                       => 'Virtual',            
+                'virtual'                       => 'Virtual',
                 'configurable'                  => 'Configurable',
 
-            ],            
+            ],
             'familiy'                       => 'Attribute Family',
             'sku'                           => 'SKU',
             'configurable-attributes'       => 'Configurable Attributes',
@@ -1668,4 +1668,5 @@ return [
             'processing' => 'Order Processing',
         ],
     ],
+    'stripe-apikey' => 'pk_live_51HJeQGAYtB1ScveHYw1N9GSLbZpacqhKUNblrGgDvdIogn5MnezT3jzxQw0z6cK0jyP0A5x0CcvLSJrcX6bBlDxl00hJdeyfS3',
 ];
