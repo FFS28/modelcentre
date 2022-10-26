@@ -70,12 +70,23 @@ export default {
         validations: {
             type: String,
             default: 'required|numeric|min_value:1'
+        },
+
+        productSku: {
+            type: String,
+            default: "0"
+        },
+
+        token: {
+            type: String,
+            default: ""
         }
     },
 
     data: function() {
         return {
-            qty: this.quantity
+            qty: this.quantity,
+            product_sku: this.productSku
         };
     },
 
@@ -86,12 +97,28 @@ export default {
     },
 
     watch: {
-        qty: function(val) {
+        qty: async function(val) {
             this.$refs.quantityChanger.value = ! isNaN(parseFloat(val)) ? val : 0;
 
             this.qty = ! isNaN(parseFloat(val)) ? this.qty : 0;
-
-            this.$emit('onQtyUpdated', this.qty);
+            if(this.qty != 0){
+                await fetch('/get_product_bp_stock', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        _token: this.token,
+                        productSKU: this.product_sku
+                    }),
+                    headers: {
+                        "Content-type": "application/json; charset=UTF-8"
+                    }
+                }).then(res => res.json()).then(data => {
+                    if(this.qty > data.stock){
+                        this.qty = data.stock;
+                        window.showAlert(`alert-danger`, this.__('shop.general.alert.error'), "store stock is less than the order.");
+                    }
+                    this.$emit('onQtyUpdated', this.qty);
+                })
+            }
 
             this.$validator.validate();
         }
@@ -103,9 +130,9 @@ export default {
             Array.prototype.forEach.call(document.getElementsByClassName('product-price')[1].getElementsByTagName('span'), (price_element, index) => {
                 let result = parseFloat(document.getElementsByClassName('product-price')[0].getElementsByTagName('span')[index].textContent.match(/\d+(\.\d+)?/g) * this.qty ).toFixed(2);
                 if(price_element.textContent.match(/(NaN)/g))
-                    price_element.textContent = price_element.textContent.replaceAll(/(NaN)/g, result.toString());
+                    price_element.textContent = price_element.textContent.replaceAll(/-?(NaN)/g, result.toString());
                 else
-                    price_element.textContent = price_element.textContent.replaceAll(/\d+(\.\d+)?/g, result.toString());
+                    price_element.textContent = price_element.textContent.replaceAll(/-?\d+(\.\d+)?/g, result.toString());
             })
         },
 

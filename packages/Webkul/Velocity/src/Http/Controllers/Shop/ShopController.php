@@ -4,6 +4,7 @@ namespace Webkul\Velocity\Http\Controllers\Shop;
 
 use Webkul\Product\Facades\ProductImage;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\BPController;
 
 class ShopController extends Controller
 {
@@ -417,5 +418,22 @@ class ShopController extends Controller
         }
 
         return $data;
+    }
+
+    /**
+     * Get product BP stock
+     *
+     * @return number $stock
+     */
+    public function getProductBPStock() {
+        $product_sku = request()->productSKU;
+        $bpadapter = new BPController();
+        $bpadapter->init();
+        $bpadapter->authenticate();
+        $product_id = $bpadapter->getProductIDFromSKU($product_sku);
+        $bpproduct = $bpadapter->getProductStock([$product_id[0][0]]);
+        $stock = $bpproduct[$product_id[0][0]]['total']['inStock'];
+
+        return ["stock"=> $stock];
     }
 }

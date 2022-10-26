@@ -171,7 +171,7 @@
                                     <div class="row mt-2 mb-2" style="align-items: center;">
                                         <div class="col-6">
                                             @if ($product->getTypeInstance()->showQuantityBox())
-                                                <quantity-changer quantity-text="{{ __('shop::app.products.quantity') }}"></quantity-changer>
+                                            <quantity-changer quantity-text="{{ __('shop::app.products.quantity') }}" product-sku="{{$product->sku}}" token="{{csrf_token()}}"></quantity-changer>
                                             @else
                                                 <input type="hidden" name="quantity" value="1">
                                             @endif

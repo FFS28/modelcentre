@@ -60,6 +60,7 @@ class BPController
 			'brightpearl-auth: '.$this->authToken,
 			'content-Type: application/json'
 		);
+
 		$reqURL = 'https://ws-eu1.brightpearl.com/2.0.0/'.$this->account.'/warehouse-service/product-availability/'.implode(',', $productID);
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $reqURL);

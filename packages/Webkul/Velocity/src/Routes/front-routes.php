@@ -96,4 +96,5 @@ Route::group(['middleware' => ['web', 'locale', 'theme', 'currency']], function 
 
     Route::post('/getAllCustomizeOptions', [ShopController::class, 'getAllCustomizeOptions']);
 
+    Route::post('/get_product_bp_stock', [ShopController::class, 'getProductBPStock']);
 });
