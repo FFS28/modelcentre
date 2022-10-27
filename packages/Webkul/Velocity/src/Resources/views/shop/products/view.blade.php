@@ -313,6 +313,7 @@
             var thumbList = document.getElementsByClassName('thumb-list')[0];
             var thumbFrame = document.getElementsByClassName('thumb-frame');
             var productHeroImage = document.getElementsByClassName('product-hero-image')[0];
+            var productInfo = JSON.parse(String("{{$product}}").replace(/\&quot\;/g, '"'))
 
             if (thumbList && productHeroImage) {
                 for (let i=0; i < thumbFrame.length ; i++) {
@@ -342,6 +343,21 @@
                     }
                 }
             }
+
+            setInterval(() => {
+                fetch('/get_product_bp_stock', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        _token: "{{csrf_token()}}",
+                        productSKU: productInfo.sku
+                    }),
+                    headers: {
+                        "Content-type": "application/json; charset=UTF-8"
+                    }
+                }).then(res => res.json()).then(data => {
+                    document.getElementById('instocklevel').innerHTML = `IN STOCK ${data.stock} AVAILABLE`
+                })
+            }, 2000);
         };
     </script>
 @endpush
