@@ -65,6 +65,7 @@
             fetch("/getAllCategories").then(res => res.json()).then(data => {
                 this.categories = data[0].children;
                 this.rootCategoryUrl = this.rootCategoryUrl + "/";
+                console.log("This is categry urls", this.rootCategoryUrl, this.categories)
             }).catch(err => {console.log(err)})
         },
 
