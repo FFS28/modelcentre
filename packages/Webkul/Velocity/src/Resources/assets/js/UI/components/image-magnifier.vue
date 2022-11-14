@@ -6,7 +6,7 @@
             </video>
         </div>
 
-        <div class="image-container" v-else>
+        <div class="image-container" id="product-img-container" v-else>
             <div class="magnifier" :style="currentType != 'image360' ? 'display: block' : 'display: none'">
                 <img
                     :src="activeImageVideoURL"
@@ -28,7 +28,7 @@
 .outer-assets-container {
     width: 100%;
     .img360 {
-        width: 640px;
+        width: 100%;
     }
     .image-container {
         .magnifier {
@@ -73,6 +73,7 @@ export default {
             activeImage: null,
             activeImageVideoURL: this.src,
             currentType: this.type,
+            scale: 1
         };
     },
 
@@ -90,6 +91,7 @@ export default {
             this.elevateZoom()
             this.make360()
         }
+        this.scale = $("#product-img-container").width() / this.scale;
 
         this.$root.$on(
             'changeMagnifiedImage',
@@ -134,7 +136,7 @@ export default {
             this.activeImage.ezPlus({
                 zoomLevel: 0.5,
                 cursor: 'pointer',
-                scrollZoom: true,
+                scrollZoom: false,
                 zoomWindowWidth: 300,
                 zoomWindowHeight: 300,
             });
@@ -145,8 +147,8 @@ export default {
                 imageCount: this.activeImageVideoURL.length > 36 ? 36 : this.activeImageVideoURL.length,
                 imageExt:'jpg',
                 canvasID:'mycar',
-                canvasWidth: 640,
-                canvasHeight: 480,
+                canvasWidth: 640 * this.scale,
+                canvasHeight: 480 * this.scale,
                 autoRotate: false
             });
         },
