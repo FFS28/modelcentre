@@ -73,7 +73,7 @@ export default {
             activeImage: null,
             activeImageVideoURL: this.src,
             currentType: this.type,
-            scale: 1
+            scale: $("#product-img-container").width() / this.scale
         };
     },
 
@@ -91,7 +91,6 @@ export default {
             this.elevateZoom()
             this.make360()
         }
-        this.scale = $("#product-img-container").width() / this.scale;
 
         this.$root.$on(
             'changeMagnifiedImage',
