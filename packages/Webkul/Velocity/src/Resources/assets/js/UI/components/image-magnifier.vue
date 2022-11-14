@@ -73,7 +73,7 @@ export default {
             activeImage: null,
             activeImageVideoURL: this.src,
             currentType: this.type,
-            scale: $("#product-img-container").width() / this.scale
+            scale: $("#product-img-container").width() / 640
         };
     },
 
