@@ -73,12 +73,13 @@ export default {
             activeImage: null,
             activeImageVideoURL: this.src,
             currentType: this.type,
-            scale: $("#product-img-container").width() / 640
+            scale: 1
         };
     },
 
     mounted: function () {
         /* binding should be with class as ezplus is having bug of creating multiple containers */
+        this.scale = $("#product-img-container").width() / 640;
         this.activeImage = $('.main-product-image');
         this.activeImageVideoURL = JSON.parse(this.activeImageVideoURL)
         if(this.currentType != "image360"){
@@ -95,6 +96,7 @@ export default {
         this.$root.$on(
             'changeMagnifiedImage',
             ({ smallImageUrl, largeImageUrl, currentType }) => {
+                this.scale = $("#product-img-container").width() / 640;
                 if(currentType == "image360") {
                     $('.zoomContainer').remove();
                     this.activeImage.removeData('elevateZoom');
@@ -102,7 +104,6 @@ export default {
                     this.currentType = currentType;
                     this.make360();
                 }else {
-                    console.log("changed")
                     /* removed old instance */
                     $('.zoomContainer').remove();
                     this.activeImage.removeData('elevateZoom');
@@ -136,8 +137,8 @@ export default {
                 zoomLevel: 0.5,
                 cursor: 'pointer',
                 scrollZoom: false,
-                zoomWindowWidth: 300,
-                zoomWindowHeight: 300,
+                zoomWindowWidth: 150,
+                zoomWindowHeight: 150,
             });
         },
         make360: function() {
