@@ -12,6 +12,7 @@ return [
          * VendorB\ModuleY\Providers\ModuleServiceProvider::class
          *
          */
+
         \Webkul\Admin\Providers\ModuleServiceProvider::class,
         \Webkul\Attribute\Providers\ModuleServiceProvider::class,
         \Webkul\BookingProduct\Providers\ModuleServiceProvider::class,
