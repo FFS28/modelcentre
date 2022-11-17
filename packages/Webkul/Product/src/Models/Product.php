@@ -20,6 +20,7 @@ use Webkul\Product\Contracts\Product as ProductContract;
 use Webkul\Product\Database\Eloquent\Builder;
 use Webkul\Product\Database\Factories\ProductFactory;
 use Webkul\Product\Type\AbstractType;
+use Illuminate\Support\Facades\DB;
 
 class Product extends Model implements ProductContract
 {
@@ -600,5 +601,15 @@ class Product extends Model implements ProductContract
     protected static function newFactory(): Factory
     {
         return ProductFactory::new ();
+    }
+
+    public function getCustomizableOptions($productId) {
+        $data = [];
+        $options = DB::table('product_option')->where('product_id', $productId)->get();
+        for($i = 0; $i < count($options); $i++){
+            $suboptions = DB::table('product_option_value')->where('option_id', $options[$i]->id)->get();
+            $data[$i] = [ "id" => $options[$i]->id, "option" => $options[$i]->title, "type" => $options[$i]->type, "price"=>$options[$i]->price, "suboptions" => $suboptions ];
+        }
+        return $data;
     }
 }

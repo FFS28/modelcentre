@@ -18,6 +18,7 @@ use Webkul\Product\Repositories\ProductDownloadableLinkRepository;
 use Webkul\Product\Repositories\ProductDownloadableSampleRepository;
 use Webkul\Product\Repositories\ProductInventoryRepository;
 use Webkul\Product\Repositories\ProductRepository;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
@@ -410,5 +411,44 @@ class ProductController extends Controller
         return response()->json(
             $this->productRepository->searchSimpleProducts(request()->input('query'))
         );
+    }
+
+    public function customCreate() {
+        $product_id = request()->input('product_id');
+        $title = request()->input('title');
+        $type = request()->input('type');
+        $price = request()->input('price');
+        $id = DB::table('product_option')->insert([
+            "product_id" => $product_id,
+            "title" => $title,
+            "type" => $type,
+            "price" => $price
+        ]);
+        return $id;
+    }
+
+    public function customDelete() {
+        $data = request()->input('option_id');
+        DB::table('product_option')->where('id', $data)->delete();
+        DB::table('product_option_value')->where('option_id', $data)->delete();
+        return "success";
+    }
+
+    public function subcustomCreate() {
+        $option_id = request()->input('option_id');
+        $title = request()->input('title');
+        $price = request()->input('price');
+        $id = DB::table('product_option_value')->insert([
+            "option_id" => $option_id,
+            "type_title" => $title,
+            "type_price" => $price
+        ]);
+        return $id;
+    }
+
+    public function subcustomDelete() {
+        $data = request()->input('suboption_id');
+        DB::table('product_option_value')->where('id', $data)->delete();
+        return "success";
     }
 }

@@ -10,7 +10,7 @@
             .content-container .content .page-header .page-title{
                 width: 100%;
             }
-            
+
             .content-container .content .page-header .page-title .control-group {
                 margin-top: 20px!important;
                 width: 100%!important;
@@ -21,7 +21,7 @@
                 margin-top: 10px!important;
                 float: left;
             }
-       }        
+       }
     </style>
 @endpush
 
@@ -31,6 +31,7 @@
             $locale = core()->checkRequestedLocaleCodeInRequestedChannel();
             $channel = core()->getRequestedChannelCode();
             $channelLocales = core()->getAllLocalesByRequestedChannel()['locales'];
+            $customizableOption = $product->getCustomizableOptions($product->id);
         @endphp
 
         {!! view_render_event('bagisto.admin.catalog.product.edit.before', ['product' => $product]) !!}
@@ -177,7 +178,6 @@
                                     @endif
 
                                 @endforeach
-
                                 @if ($attributeGroup->name == 'Price')
 
                                     @include ('admin::catalog.products.accordians.customer-group-price')
@@ -193,6 +193,118 @@
                     @endif
 
                 @endforeach
+                <accordian title="{{ __('This is Customizable option') }}"
+                    :active="{{$index == 0 ? 'true' : 'false'}}">
+                        <div slot="body">
+                            <div class="control-group" style="display: flex; gap: 20px;">
+                                <label class="btn btn-lg btn-primary" style="display: table; width: auto;"  onclick="create_option_panel()">
+                                    Create New Customizable option
+                                </label>
+                                <label class="btn btn-lg btn-primary" style="display: table; width: auto;"  onclick="create_sub_option_panel()">
+                                    Create New Sub Customizable option
+                                </label>
+                            </div>
+                            <div class="create-option-panel" id="create-option-panel">
+                                <div class="control-group">
+                                    <label>Option Title</label>
+                                    <input type="text" class="control" aria-required="false" id="option_title">
+                                </div>
+                                <div class="control-group select ">
+                                    <label for="option_type">Option Type</label>
+                                    <select id="option_type" class="control" aria-required="false" onchange="showPricePanel()">
+                                        <option value="radio">
+                                            radio
+                                        </option>
+                                        <option value="field">
+                                            field
+                                        </option>
+                                        <option value="area">
+                                            area
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="control-group" id="price_panel" style="display: none">
+                                    <label>price</label>
+                                    <input type="number" class="control" aria-required="false" min="0" defaultValue="0" id="option_price">
+                                </div>
+                                <div class="control-group" style="display: flex; gap: 10px" >
+                                    <label class="btn btn-lg btn-primary" style="display: table; width: auto;"  onclick="save_options()">
+                                        save
+                                    </label>
+                                    <label class="btn btn-lg btn-primary" style="display: table; width: auto;"  onclick="hide_option_panel()">
+                                        cancel
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="create-sub-option-panel" id="create-sub-option-panel" style="display: none">
+                                <div class="control-group select ">
+                                    <label for="option_selector">Option Select</label>
+                                    <select id="option_selector" class="control" aria-required="false">
+                                        @foreach ($customizableOption as $option)
+                                            <option value="{{$option['id']}}">
+                                                {{$option['option']}}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="control-group">
+                                    <label>Sub Option Title</label>
+                                    <input type="text" class="control" aria-required="false" id="sub_option_title">
+                                </div>
+                                <div class="control-group">
+                                    <label>Sub Option Price</label>
+                                    <input type="number" class="control" aria-required="false" min="0" defaultValue="0" id="sub_option_price">
+                                </div>
+                                <div class="control-group" style="display: flex; gap: 10px" >
+                                    <label class="btn btn-lg btn-primary" style="display: table; width: auto;"  onclick="save_sub_options()">
+                                        save
+                                    </label>
+                                    <label class="btn btn-lg btn-primary" style="display: table; width: auto;"  onclick="hide_sub_option_panel()">
+                                        cancel
+                                    </label>
+                                </div>
+                            </div>
+                            <div id="option_content">
+                            @foreach ($customizableOption as $option)
+                                <div class="table" style="margin-bottom: 20px; margin-top: 20px;"  id="option_content_{{$option['id']}}">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th width="60%">{{$option['option']}}</th>
+                                                <th width="15%">{{$option['type']}}</th>
+                                                <th width="15%">{{$option['price']}}</th>
+                                                <th width="10%">
+                                                    <label class="btn btn-lg btn-primary" style="width: auto; padding: 5px;"  onclick="delete_option({{$option['id']}})">delete</label>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td colspan="4">
+                                                    <table>
+                                                        <tbody>
+                                                            @foreach ($option['suboptions'] as $suboption)
+                                                                <tr id="suboption_{{$suboption->id}}">
+                                                                    <td width="60%">{{$suboption->type_title}}</td>
+                                                                    <td width="15%"></td>
+                                                                    <td width="15%">{{$suboption->type_price}}</td>
+                                                                    <td width="10%">
+                                                                        <label class="btn btn-lg btn-primary" style="width: auto; padding: 5px;"  onclick="delete_sub_option('{{$suboption->id}}')">delete</label>
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @endforeach
+                            </div>
+                        </div>
+                </accordian>
 
                 {!! view_render_event(
                   'bagisto.admin.catalog.product.edit_form_accordian.additional_views.before',
@@ -244,5 +356,144 @@
                 image_advtab: true,
             });
         });
+
+        function create_option_panel() {
+            initialize();
+            $("#create-option-panel").show();
+            $("#create-sub-option-panel").hide();
+        }
+
+        function create_sub_option_panel() {
+            initialize();
+            $("#create-sub-option-panel").show();
+            $("#create-option-panel").hide();
+        }
+
+        function hide_option_panel() {
+            $("#create-option-panel").hide()
+        }
+
+        function hide_sub_option_panel() {
+            $("#create-sub-option-panel").hide()
+        }
+
+        function showPricePanel() {
+            $("#option_price").val(0);
+            if($("#option_type").val() == "radio") {
+                $("#price_panel").hide();
+            }else {
+                $("#price_panel").show();
+            }
+        }
+
+        function initialize() {
+            $("#option_title").val("");
+            $("#option_type").val("");
+            $("#option_price").val(0);
+            $("#sub_option_title").val("");
+            $("#sub_option_price").val(0);
+        }
+
+        function save_options() {
+            let product_id = "{{$product->id}}";
+            let title = $("#option_title").val();
+            let type = $("#option_type").val();
+            let price = type == "radio" ? null : $("#option_price").val();
+
+            $.ajax({
+                type: "post",
+                url: "{{ route('admin.catalog.products.customcreate') }}",
+                data: {
+                    _token: "{{csrf_token()}}",
+                    product_id: product_id,
+                    title: title,
+                    type: type,
+                    price: price
+                },
+                success: function(data) {
+                    $("#option_selector").append(`<option value="${data}">${title}</option>`);
+                    $("#option_content").append(`<div class="table" style="margin-bottom: 20px; margin-top: 20px;"  id="option_content_${data}">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th width="60%">${title}</th>
+                                    <th width="15%">${type}</th>
+                                    <th width="15%">${price == null ? "" : price}</th>
+                                    <th width="10%">
+                                        <label class="btn btn-lg btn-primary" style="width: auto; padding: 5px;"  onclick="delete_option(${data})">delete</label>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="4">
+                                        <table>
+                                            <tbody>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>`)
+                }
+            })
+        }
+
+        function save_sub_options() {
+            let option_id = $("#option_selector").val();
+            let title = $("#sub_option_title").val();
+            let price = $("#sub_option_price").val();
+
+            $.ajax({
+                type: "post",
+                url: "{{ route('admin.catalog.products.subcustomcreate') }}",
+                data: {
+                    _token: "{{csrf_token()}}",
+                    option_id: option_id,
+                    title: title,
+                    price: price
+                },
+                success: function(data) {
+                    $("#option_content_" + option_id + " tbody tbody").append(`<tr id="suboption_${data}">
+                        <td width="60%">${title}</td>
+                        <td width="15%"></td>
+                        <td width="15%">${price}</td>
+                        <td width="10%">
+                            <label class="btn btn-lg btn-primary" style="width: auto; padding: 5px;"  onclick="delete_sub_option(${data})">delete</label>
+                        </td>
+                    </tr>`)
+                }
+            })
+        }
+
+        function delete_sub_option(suboption_id) {
+            $.ajax({
+                type: "POST",
+                url: "{{ route('admin.catalog.products.subcustomdelete') }}",
+                data: {
+                    _token: "{{csrf_token()}}",
+                    suboption_id: suboption_id
+                },
+                success: function(data) {
+                    $("#suboption_"+suboption_id).remove();
+                }
+            })
+        }
+
+        function delete_option(option_id) {
+            $.ajax({
+                type: "post",
+                url: "{{ route('admin.catalog.products.customdelete') }}",
+                data: {
+                    _token: "{{csrf_token()}}",
+                    option_id: option_id
+                },
+                success: function(data) {
+                    $("#option_selector option[value=" + option_id + "]").remove();
+                    $("#option_content_"+option_id).remove();
+                }
+            })
+        }
     </script>
 @endpush

@@ -73,6 +73,14 @@ Route::group(['middleware' => ['web', 'admin'], 'prefix' => config('app.admin_ur
             'view' => 'admin.catalog.products.edit',
         ])->name('admin.catalog.products.file.download');
 
+        Route::post('/products/custom/create', [ProductController::class, 'customCreate'])->name('admin.catalog.products.customcreate');
+
+        Route::post('/products/custom/delete', [ProductController::class, 'customDelete'])->name('admin.catalog.products.customdelete');
+
+        Route::post('/products/custom/subcreate', [ProductController::class, 'subcustomCreate'])->name('admin.catalog.products.subcustomcreate');
+
+        Route::post('/products/custom/subdelete', [ProductController::class, 'subcustomDelete'])->name('admin.catalog.products.subcustomdelete');
+
         /**
          * Categories routes.
          */
@@ -106,6 +114,7 @@ Route::group(['middleware' => ['web', 'admin'], 'prefix' => config('app.admin_ur
 
         Route::post('/categories/product/count', [CategoryController::class, 'categoryProductCount'])->name('admin.catalog.categories.product.count');
 
+        Route::post('/product/test', function(){return "success";})->name('admin.catalog.customoption.test');
         /**
          * Attributes routes.
          */
