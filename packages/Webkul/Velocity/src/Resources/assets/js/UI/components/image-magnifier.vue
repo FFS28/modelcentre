@@ -79,7 +79,7 @@ export default {
 
     mounted: function () {
         /* binding should be with class as ezplus is having bug of creating multiple containers */
-        this.scale = $("#product-img-container").width() / 640;
+        this.scale = $("#product-img-container").width() / 360;
         this.activeImage = $('.main-product-image');
         this.activeImageVideoURL = JSON.parse(this.activeImageVideoURL)
         if(this.currentType != "image360"){
@@ -96,7 +96,7 @@ export default {
         this.$root.$on(
             'changeMagnifiedImage',
             ({ smallImageUrl, largeImageUrl, currentType }) => {
-                this.scale = $("#product-img-container").width() / 640;
+                this.scale = $("#product-img-container").width() / 360;
                 if(currentType == "image360") {
                     $('.zoomContainer').remove();
                     this.activeImage.removeData('elevateZoom');
@@ -148,7 +148,7 @@ export default {
                 imageExt:'jpg',
                 canvasID:'mycar',
                 canvasWidth: 640 * this.scale,
-                canvasHeight: 480 * this.scale,
+                canvasHeight: 360 * this.scale,
                 autoRotate: false
             });
         },
