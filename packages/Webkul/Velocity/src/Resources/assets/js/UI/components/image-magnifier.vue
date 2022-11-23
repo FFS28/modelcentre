@@ -137,8 +137,8 @@ export default {
                 zoomLevel: 0.5,
                 cursor: 'pointer',
                 scrollZoom: false,
-                zoomWindowWidth: 150,
-                zoomWindowHeight: 150,
+                zoomWindowWidth: 300,
+                zoomWindowHeight: 300,
             });
         },
         make360: function() {
