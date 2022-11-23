@@ -103,13 +103,16 @@
                 iMouseY = Math.floor(e.pageY - canvasOffset.top);
         	    modulus=Math.ceil(iMouseX / tx);
                 if(modulus<=0) { modulus=1}else if(modulus >options.imageCount){modulus=options.imageCount}else{};
-                if(options.autoRotate==false && bMouseDown==false){
+                if(options.autoRotate==false && bMouseDown==true){
         	       rotate360(modulus);
                 }
-                if(bMouseDown==true){
-                    zoom(img_Array[zoomOn]);
-                }
+                // if(bMouseDown==true){
+                //     zoom(img_Array[zoomOn]);
+                // }
             });
+            view360.find("#"+options.canvasID).mousedown(function(e){ //  mousedown event
+                bMouseDown = true;
+            })
           //   view360.find("#"+options.canvasID).mousedown(function(e){ //  mousedown event
           //      bMouseDown = true;
         	 //   if(options.autoRotate==true){stop_auto_rotate();}
