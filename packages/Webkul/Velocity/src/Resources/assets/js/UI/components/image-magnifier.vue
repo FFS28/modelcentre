@@ -142,6 +142,7 @@ export default {
             });
         },
         make360: function() {
+            cosole.log("asdasd");
             $(".image360").tikslus360({
                 imageDir: this.activeImageVideoURL,
                 imageCount: this.activeImageVideoURL.length > 36 ? 36 : this.activeImageVideoURL.length,
