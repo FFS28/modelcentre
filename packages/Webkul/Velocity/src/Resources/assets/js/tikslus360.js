@@ -21,7 +21,7 @@
         var loaded = false;
         var context;
         var iMouseX, iMouseY = 1;
-        var bMouseDown = false;
+        var bMouseDown = true;
         var tx;
         var img_Array = new Array();
         var ga = 0.0;
@@ -105,7 +105,7 @@
                     rotate360(modulus);
                 }
                 if (bMouseDown == true) {
-                    zoom(img_Array[zoomOn]);
+                    // zoom(img_Array[zoomOn]);
                 }
             });
             view360.find("#" + options.canvasID).mousedown(function (e) { //  mousedown event
