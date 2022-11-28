@@ -132,7 +132,7 @@ export default {
     methods: {
         elevateZoom: function () {
             $(".magnifier").css({cursor: 'point'})
-            console.log(this.activeImage)
+
             this.activeImage.ezPlus({
                 zoomLevel: 0.5,
                 cursor: 'pointer',
