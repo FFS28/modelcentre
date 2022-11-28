@@ -115,20 +115,6 @@
             view360.find("#" + options.canvasID).mouseup(function (e) { // binding mouseup event
                 bMouseDown = true;
             });
-            //   view360.find("#"+options.canvasID).mousedown(function(e){ //  mousedown event
-            //      bMouseDown = true;
-            //   if(options.autoRotate==true){stop_auto_rotate();}
-            //   var canvasOffset = $(canvas).offset();
-            //      iMouseX = Math.floor(e.pageX - canvasOffset.left);
-            //      iMouseY = Math.floor(e.pageY - canvasOffset.top);
-            //    zoomOn=Math.ceil(iMouseX / tx); //find image number that is to be zoomed on
-            //   if(zoomOn<=0) { zoomOn=1}else if(zoomOn >options.imageCount){zoomOn=options.imageCount}else{};
-            //   });
-            //   view360.find("#"+options.canvasID).mouseup(function(e) { // binding mouseup event
-            //       bMouseDown = false;
-            // zoomOn=0;
-            // $(this).css({cursor:'e-resize'});
-            //   });
             view360.find(".autorotate").click(function (e) {
                 e.preventDefault();
                 if (options.autoRotate == false) {
@@ -166,21 +152,21 @@
 
         var zoom = function (image) { // main zoom function
             clear(); // clear canvas
-            if (bMouseDown) { // drawing zoom area
-                context.drawImage(image, 0 - iMouseX * (options.zoomPower - 1), 0 - iMouseY * (options.zoomPower - 1), context.canvas.width * options.zoomPower, context.canvas.height * options.zoomPower);
-                context.globalCompositeOperation = 'destination-atop';
+            // if (bMouseDown) { // drawing zoom area
+            //     context.drawImage(image, 0 - iMouseX * (options.zoomPower - 1), 0 - iMouseY * (options.zoomPower - 1), context.canvas.width * options.zoomPower, context.canvas.height * options.zoomPower);
+            //     context.globalCompositeOperation = 'destination-atop';
 
-                var oGrd = context.createRadialGradient(iMouseX, iMouseY, 0, iMouseX, iMouseY, options.zoomRadius);
-                oGrd.addColorStop(0.9, "rgba(0, 0, 0, 1.0)");
-                oGrd.addColorStop(1.0, "rgba(0, 0, 0, 0.1)");
-                context.fillStyle = oGrd;
+            //     var oGrd = context.createRadialGradient(iMouseX, iMouseY, 0, iMouseX, iMouseY, options.zoomRadius);
+            //     oGrd.addColorStop(0.9, "rgba(0, 0, 0, 1.0)");
+            //     oGrd.addColorStop(1.0, "rgba(0, 0, 0, 0.1)");
+            //     context.fillStyle = oGrd;
 
-                context.beginPath();
-                context.arc(iMouseX, iMouseY, options.zoomRadius, 0, Math.PI * 2, true);
-                context.closePath();
-                context.fill();
-            }
-            context.drawImage(image, 0, 0, context.canvas.width, context.canvas.height);
+            //     context.beginPath();
+            //     context.arc(iMouseX, iMouseY, options.zoomRadius, 0, Math.PI * 2, true);
+            //     context.closePath();
+            //     context.fill();
+            // }
+            // context.drawImage(image, 0, 0, context.canvas.width, context.canvas.height);
         }
 
         init_();
