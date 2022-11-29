@@ -151,7 +151,7 @@
         }
 
         var zoom = function (image) { // main zoom function
-            clear(); // clear canvas
+            // clear(); // clear canvas
             // if (bMouseDown) { // drawing zoom area
             //     context.drawImage(image, 0 - iMouseX * (options.zoomPower - 1), 0 - iMouseY * (options.zoomPower - 1), context.canvas.width * options.zoomPower, context.canvas.height * options.zoomPower);
             //     context.globalCompositeOperation = 'destination-atop';
