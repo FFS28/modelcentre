@@ -1,4 +1,8 @@
-
+/*
+Tikslus360 v 1.0.0
+Author: Pushpendra Singh Chouhan @ pushpendra.as400@gmail.com
+http://tikslus.com
+*/
 (function ($) {
     var Tikslus360 = function (element, options) {
         var view360 = $(element);
@@ -37,22 +41,20 @@
         var clear = function () { // clear canvas function
             context.clearRect(0, 0, context.canvas.width, context.canvas.height);
         }
-
-        var load_images = function (name = "") {
+        var load_images = function () {
             for (var i = 1; i <= options.imageCount; i++) {
                 img_Array[i] = new Image();
 
                 img_Array[i].src = options.imageDir[i];
-
                 clear();
-
                 img_Array[i].onload = function () {
                     context.font = 'italic 40pt Calibri';
                     context.fillText('loading:' + (i - 1) + "/" + options.imageCount, 150, 100);
                 }
             }
             //fadeIN first image
-            fadeTimerId = setInterval(function () { fadeIn(); }, options.fadeInInterval);
+            //fadeTimerId=setInterval(function(){fadeIn();}, options.fadeInInterval);
+
         }
 
         var fadeIn = function () {
@@ -110,10 +112,13 @@
             });
             view360.find("#" + options.canvasID).mousedown(function (e) { //  mousedown event
                 bMouseDown = false;
+                zoomOn = 0;
                 $(this).css({ cursor: 'e-resize' });
-            })
+            });
             view360.find("#" + options.canvasID).mouseup(function (e) { // binding mouseup event
                 bMouseDown = true;
+                // zoomOn = Math.ceil(iMouseX / tx); //find image number that is to be zoomed on
+                // if (zoomOn <= 0) { zoomOn = 1 } else if (zoomOn > options.imageCount) { zoomOn = options.imageCount } else { };
             });
             view360.find(".autorotate").click(function (e) {
                 e.preventDefault();
@@ -137,7 +142,6 @@
             options.autoRotate = true;
             autoRotateTimeId = setInterval(function () { auto_rotate360(); }, options.autoRotateInterval);
         }
-
         function stop_auto_rotate() {
             options.autoRotate = false;
             clearInterval(autoRotateTimeId);
@@ -146,30 +150,39 @@
         function auto_rotate360() {
             if (modulus > 0 && modulus <= options.imageCount && auto_rotate_count <= 0) { auto_rotate_count = modulus; }
             auto_rotate_count++;
-            if (auto_rotate_count > options.imageCount) { auto_rotate_count = 1; }
+            if (auto_rotate_count > options.imageCount) {
+                auto_rotate_count = 1;
+            }
             rotate360(auto_rotate_count);
         }
 
+
+
+
+
+
+
         var zoom = function (image) { // main zoom function
-            // clear(); // clear canvas
-            // if (bMouseDown) { // drawing zoom area
-            //     context.drawImage(image, 0 - iMouseX * (options.zoomPower - 1), 0 - iMouseY * (options.zoomPower - 1), context.canvas.width * options.zoomPower, context.canvas.height * options.zoomPower);
-            //     context.globalCompositeOperation = 'destination-atop';
 
-            //     var oGrd = context.createRadialGradient(iMouseX, iMouseY, 0, iMouseX, iMouseY, options.zoomRadius);
-            //     oGrd.addColorStop(0.9, "rgba(0, 0, 0, 1.0)");
-            //     oGrd.addColorStop(1.0, "rgba(0, 0, 0, 0.1)");
-            //     context.fillStyle = oGrd;
-
-            //     context.beginPath();
-            //     context.arc(iMouseX, iMouseY, options.zoomRadius, 0, Math.PI * 2, true);
-            //     context.closePath();
-            //     context.fill();
-            // }
-            // context.drawImage(image, 0, 0, context.canvas.width, context.canvas.height);
+            clear(); // clear canvas
+            if (bMouseDown) { // drawing zoom area
+                context.drawImage(image, 0 - iMouseX * (options.zoomPower - 1), 0 - iMouseY * (options.zoomPower - 1), context.canvas.width * options.zoomPower, context.canvas.height * options.zoomPower);
+                context.globalCompositeOperation = 'destination-atop';
+                //var oGrd = context.createRadialGradient(iMouseX, iMouseY, 0, iMouseX, iMouseY, options.zoomRadius); //create lens
+                //oGrd.addColorStop(0.9, "rgba(0, 0, 0, 1.0)");
+                //oGrd.addColorStop(1.0, "rgba(0, 0, 0, 0.1)");
+                //context.fillStyle = oGrd;
+                context.beginPath();
+                context.arc(iMouseX, iMouseY, options.zoomRadius, 0, Math.PI * 2, true);
+                context.closePath();
+                context.fill();
+            }
+            // draw source image
+            context.drawImage(image, 0, 0, context.canvas.width, context.canvas.height);
         }
 
         init_();
+
     };
 
     $.fn.tikslus360 = function (options) {

@@ -72,8 +72,7 @@ export default {
         return {
             activeImage: null,
             activeImageVideoURL: this.src,
-            // currentType: this.type,
-            currentType: "image360",
+            currentType: this.type,
             scale: 1
         };
     },
@@ -145,10 +144,8 @@ export default {
         make360: function() {
             console.log("asdasd");
             $(".image360").tikslus360({
-                // imageDir: this.activeImageVideoURL,
-                imageDir: "/images",
-                // imageCount: this.activeImageVideoURL.length > 36 ? 36 : this.activeImageVideoURL.length,
-                imageCount: 36,
+                imageDir: this.activeImageVideoURL,
+                imageCount: this.activeImageVideoURL.length > 36 ? 36 : this.activeImageVideoURL.length,
                 imageExt:'jpg',
                 canvasID:'mycar',
                 canvasWidth: 640 * this.scale,
