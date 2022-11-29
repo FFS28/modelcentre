@@ -54,7 +54,6 @@ http://tikslus.com
             }
             //fadeIN first image
             //fadeTimerId=setInterval(function(){fadeIn();}, options.fadeInInterval);
-
         }
 
         var fadeIn = function () {
